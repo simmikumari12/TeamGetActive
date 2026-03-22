@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/splash/screens/splash_screen.dart';
+import '../features/onboarding/screens/onboarding_screen.dart';
 
 /// Central route registry for Habit Mastery League.
 /// Add new named routes here as screens are implemented.
