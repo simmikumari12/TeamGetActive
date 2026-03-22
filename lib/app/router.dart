@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../features/splash/screens/splash_screen.dart';
 import '../features/onboarding/screens/onboarding_screen.dart';
+import '../features/dashboard/screens/main_screen.dart';
 
 /// Central route registry for Habit Mastery League.
 /// Add new named routes here as screens are implemented.
@@ -22,8 +23,8 @@ class AppRouter {
   /// Passed to MaterialApp.routes.
   static Map<String, WidgetBuilder> get routes => {
         splash:     (_) => const SplashScreen(),
-        onboarding: (_) => const _PlaceholderScreen(title: 'Onboarding'),
-        dashboard:  (_) => const _PlaceholderScreen(title: 'Dashboard'),
+        onboarding: (_) => const OnboardingScreen(),
+        dashboard:  (_) => const MainScreen(),
         habits:     (_) => const _PlaceholderScreen(title: 'My Habits'),
         addHabit:   (_) => const _PlaceholderScreen(title: 'Add Habit'),
         editHabit:  (_) => const _PlaceholderScreen(title: 'Edit Habit'),
