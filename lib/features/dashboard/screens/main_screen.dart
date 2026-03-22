@@ -3,6 +3,7 @@ import '../../../widgets/common/bottom_nav_bar.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../habits/screens/habits_screen.dart';
 import '../../progress/screens/progress_screen.dart';
+import '../../insights/screens/insights_screen.dart';
 import '../../rewards/screens/rewards_screen.dart';
 
 /// Shell screen that holds the bottom navigation bar and switches
@@ -17,24 +18,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  // Placeholder widget for tabs not yet implemented
-  static Widget _placeholder(String label) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.construction_rounded, size: 48, color: Colors.grey),
-            const SizedBox(height: 12),
-            Text('$label — coming soon',
-                style: const TextStyle(color: Colors.grey)),
-          ],
-        ),
-      );
-
   late final List<Widget> _screens = [
     const DashboardScreen(),
     const HabitsScreen(),
     const ProgressScreen(),
-    _placeholder('Insights'),
+    const InsightsScreen(),
     const RewardsScreen(),
   ];
 
