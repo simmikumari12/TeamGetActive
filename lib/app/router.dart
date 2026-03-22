@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../features/splash/screens/splash_screen.dart';
 import '../features/onboarding/screens/onboarding_screen.dart';
-import '../features/dashboard/screens/dashboard_screen.dart';
+import '../features/dashboard/screens/main_screen.dart';
 import '../features/habits/screens/add_habit_screen.dart';
 import '../features/progress/screens/progress_screen.dart';
 import '../features/insights/screens/insights_screen.dart';
@@ -26,7 +26,7 @@ class AppRouter {
   static Map<String, WidgetBuilder> get routes => {
     splash: (_) => const SplashScreen(),
     onboarding: (_) => const OnboardingScreen(),
-    dashboard: (_) => const DashboardScreen(),
+    dashboard: (_) => const MainScreen(),
     habits: (_) => const _PlaceholderScreen(title: 'My Habits'),
     addHabit: (_) => const AddHabitScreen(),
     editHabit: (_) => const _PlaceholderScreen(title: 'Edit Habit'),
