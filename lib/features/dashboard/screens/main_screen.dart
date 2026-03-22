@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../widgets/common/bottom_nav_bar.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 import '../../habits/screens/habits_screen.dart';
+import '../../progress/screens/progress_screen.dart';
 
 /// Shell screen that holds the bottom navigation bar and switches
 /// between the 5 main tabs using an IndexedStack (preserves scroll state).
@@ -31,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
   late final List<Widget> _screens = [
     const DashboardScreen(),
     const HabitsScreen(),
-    _placeholder('Progress'),
+    const ProgressScreen(),
     _placeholder('Insights'),
     _placeholder('Rewards'),
   ];
