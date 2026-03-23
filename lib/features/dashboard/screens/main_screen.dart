@@ -17,14 +17,35 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  final _dashboardRefresh = ValueNotifier<int>(0);
+  final _progressRefresh = ValueNotifier<int>(0);
 
-  late final List<Widget> _screens = [
-    const DashboardScreen(),
-    const HabitsScreen(),
-    const ProgressScreen(),
-    const InsightsScreen(),
-    const RewardsScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      DashboardScreen(refreshSignal: _dashboardRefresh),
+      const HabitsScreen(),
+      ProgressScreen(refreshSignal: _progressRefresh),
+      const InsightsScreen(),
+      const RewardsScreen(),
+    ];
+  }
+
+  @override
+  void dispose() {
+    _dashboardRefresh.dispose();
+    _progressRefresh.dispose();
+    super.dispose();
+  }
+
+  void _onTabTap(int i) {
+    if (i == 0) _dashboardRefresh.value++;
+    if (i == 2) _progressRefresh.value++;
+    setState(() => _currentIndex = i);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        onTap: _onTabTap,
       ),
     );
   }

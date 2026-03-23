@@ -64,6 +64,22 @@ class LogRepository {
     );
   }
 
+  /// Count of logs for a habit within a date range inclusive.
+  /// Used for weekly-target progress (e.g. gym 4/7 days).
+  Future<int> countInRange(int habitId, DateTime from, DateTime to) async {
+    final db = await DatabaseService.instance.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as c FROM ${AppDatabase.tableHabitLogs} '
+      'WHERE habit_id = ? AND completed_date BETWEEN ? AND ?',
+      [
+        habitId,
+        from.toIso8601String().substring(0, 10),
+        to.toIso8601String().substring(0, 10),
+      ],
+    );
+    return result.first['c'] as int;
+  }
+
   /// Total number of logs ever recorded — used for badge checks.
   Future<int> totalCount() async {
     final db = await DatabaseService.instance.database;

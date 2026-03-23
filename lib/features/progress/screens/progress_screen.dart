@@ -9,7 +9,8 @@ import '../../../data/repositories/log_repository.dart';
 
 /// Progress tab — per-habit streaks, 28-day heatmap, and overall XP stats.
 class ProgressScreen extends StatefulWidget {
-  const ProgressScreen({super.key});
+  final ValueNotifier<int>? refreshSignal;
+  const ProgressScreen({super.key, this.refreshSignal});
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
@@ -25,6 +26,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
   void initState() {
     super.initState();
     _loadData();
+    widget.refreshSignal?.addListener(_loadData);
+  }
+
+  @override
+  void dispose() {
+    widget.refreshSignal?.removeListener(_loadData);
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -174,10 +182,17 @@ class _HabitProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streak = StreakUtils.computeStreak(logs);
+    final isWeekly = habit.frequencyType == 'weekly';
+    final streak = isWeekly
+        ? StreakUtils.computeWeeklyStreak(logs, habit.targetCount)
+        : StreakUtils.computeStreak(logs);
+    final streakLabel = isWeekly ? 'wk streak' : 'day streak';
     final color = AppColors.categoryColors[
         habit.colorIndex.clamp(0, AppColors.categoryColors.length - 1)];
     final completed = StreakUtils.completedDates(logs);
+
+    // For weekly habits show current-week count in the subtitle
+    final weekCount = isWeekly ? StreakUtils.currentWeekCount(logs) : null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -193,7 +208,19 @@ class _HabitProgressCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: Text(habit.title, style: AppTextStyles.titleLarge)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(habit.title, style: AppTextStyles.titleLarge),
+                    if (weekCount != null)
+                      Text(
+                        '$weekCount/${habit.targetCount} days this week',
+                        style: AppTextStyles.caption
+                            .copyWith(color: AppColors.textLight),
+                      ),
+                  ],
+                ),
+              ),
               Icon(
                 Icons.local_fire_department_rounded,
                 color: streak > 0 ? AppColors.streakFire : AppColors.textLight,
@@ -201,7 +228,7 @@ class _HabitProgressCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '$streak day streak',
+                '$streak $streakLabel',
                 style: AppTextStyles.labelLarge.copyWith(
                     color: streak > 0
                         ? AppColors.streakFire

@@ -68,6 +68,56 @@ class StreakUtils {
   static Set<DateTime> completedDates(List<HabitLog> logs) =>
       logs.map((l) => _dateOnly(l.completedDate)).toSet();
 
+  /// For weekly habits: counts consecutive Mon–Sun weeks ending this or last
+  /// week where the habit was logged at least [targetCount] times.
+  static int computeWeeklyStreak(List<HabitLog> logs, int targetCount) {
+    if (logs.isEmpty) return 0;
+
+    final today = _dateOnly(DateTime.now());
+    // Monday of current week
+    final thisWeekStart = today.subtract(Duration(days: today.weekday - 1));
+
+    // Build weekStart → completion count
+    final Map<DateTime, int> weekCounts = {};
+    for (final log in logs) {
+      final d = _dateOnly(log.completedDate);
+      final ws = d.subtract(Duration(days: d.weekday - 1));
+      weekCounts[ws] = (weekCounts[ws] ?? 0) + 1;
+    }
+
+    // Streak must include this week or last week
+    final lastWeekStart = thisWeekStart.subtract(const Duration(days: 7));
+    final DateTime cursor;
+    if ((weekCounts[thisWeekStart] ?? 0) >= targetCount) {
+      cursor = thisWeekStart;
+    } else if ((weekCounts[lastWeekStart] ?? 0) >= targetCount) {
+      cursor = lastWeekStart;
+    } else {
+      return 0;
+    }
+
+    int streak = 1;
+    DateTime prev = cursor.subtract(const Duration(days: 7));
+    while ((weekCounts[prev] ?? 0) >= targetCount) {
+      streak++;
+      prev = prev.subtract(const Duration(days: 7));
+    }
+    return streak;
+  }
+
+  /// Count of logs in the current Mon–Sun week.
+  static int currentWeekCount(List<HabitLog> logs) {
+    final today = _dateOnly(DateTime.now());
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    return logs
+        .where((l) {
+          final d = _dateOnly(l.completedDate);
+          return !d.isBefore(weekStart) && !d.isAfter(weekEnd);
+        })
+        .length;
+  }
+
   /// Points for one completion, applying difficulty and streak bonus.
   static int calculatePoints(String difficulty, int currentStreak) {
     final base = AppConstants.basePointsPerCompletion;

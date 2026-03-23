@@ -12,7 +12,8 @@ import '../../../data/repositories/log_repository.dart';
 /// Main dashboard screen — first tab users see after onboarding.
 /// Shows today's habits, streak summary, and XP progress.
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final ValueNotifier<int>? refreshSignal;
+  const DashboardScreen({super.key, this.refreshSignal});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -21,22 +22,61 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   List<Habit> _habits = [];
   Set<int> _completedToday = {};
+  Set<int> _missedYesterday = {};
+  Map<int, int> _weeklyProgress = {};
   bool _loading = true;
-  final DateTime _today = DateTime.now();
+
+  DateTime get _today => DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    widget.refreshSignal?.addListener(_loadData);
+  }
+
+  @override
+  void dispose() {
+    widget.refreshSignal?.removeListener(_loadData);
+    super.dispose();
   }
 
   Future<void> _loadData() async {
+    final today = _today;
+    final yesterday = today.subtract(const Duration(days: 1));
+
     final habits = await HabitRepository.instance.getAll();
-    final completed = await LogRepository.instance.getCompletedHabitIdsForDate(_today);
+    final completedToday =
+        await LogRepository.instance.getCompletedHabitIdsForDate(today);
+    final completedYesterday =
+        await LogRepository.instance.getCompletedHabitIdsForDate(yesterday);
+
+    // Weekly progress: count logs this Mon–Sun for weekly habits
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    final Map<int, int> weeklyProgress = {};
+    for (final h in habits.where((h) => h.frequencyType == 'weekly')) {
+      weeklyProgress[h.id!] =
+          await LogRepository.instance.countInRange(h.id!, weekStart, weekEnd);
+    }
+
+    // Daily habits not logged yesterday = missed.
+    // Exclude habits created today — they couldn't have been done yesterday.
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final missed = habits
+        .where((h) =>
+            h.frequencyType == 'daily' &&
+            !completedYesterday.contains(h.id) &&
+            h.createdAt.isBefore(todayStart))
+        .map((h) => h.id!)
+        .toSet();
+
     if (!mounted) return;
     setState(() {
       _habits = habits;
-      _completedToday = completed;
+      _completedToday = completedToday;
+      _missedYesterday = missed;
+      _weeklyProgress = weeklyProgress;
       _loading = false;
     });
   }
@@ -101,11 +141,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _ProgressCard(done: done, total: total),
                   const SizedBox(height: 16),
-                  if (_habits.isEmpty) _EmptyState() else _HabitList(
-                    habits: _habits,
-                    completedIds: _completedToday,
-                    onToggle: _toggleHabit,
-                  ),
+                  if (_habits.isEmpty)
+                    _EmptyState()
+                  else
+                    _HabitList(
+                      habits: _habits,
+                      completedIds: _completedToday,
+                      missedYesterday: _missedYesterday,
+                      weeklyProgress: _weeklyProgress,
+                      onToggle: _toggleHabit,
+                    ),
                 ],
               ),
             ),
@@ -180,11 +225,15 @@ class _ProgressCard extends StatelessWidget {
 class _HabitList extends StatelessWidget {
   final List<Habit> habits;
   final Set<int> completedIds;
+  final Set<int> missedYesterday;
+  final Map<int, int> weeklyProgress;
   final ValueChanged<Habit> onToggle;
 
   const _HabitList({
     required this.habits,
     required this.completedIds,
+    required this.missedYesterday,
+    required this.weeklyProgress,
     required this.onToggle,
   });
 
@@ -198,6 +247,8 @@ class _HabitList extends StatelessWidget {
         ...habits.map((h) => _HabitTile(
               habit: h,
               isDone: completedIds.contains(h.id),
+              missedYesterday: missedYesterday.contains(h.id),
+              weeklyCount: weeklyProgress[h.id],
               onToggle: () => onToggle(h),
             )),
       ],
@@ -208,18 +259,41 @@ class _HabitList extends StatelessWidget {
 class _HabitTile extends StatelessWidget {
   final Habit habit;
   final bool isDone;
+  final bool missedYesterday;
+  final int? weeklyCount;
   final VoidCallback onToggle;
 
   const _HabitTile({
     required this.habit,
     required this.isDone,
     required this.onToggle,
+    this.missedYesterday = false,
+    this.weeklyCount,
   });
 
   @override
   Widget build(BuildContext context) {
     final color = AppColors.categoryColors[
         habit.colorIndex.clamp(0, AppColors.categoryColors.length - 1)];
+
+    final isWeekly = habit.frequencyType == 'weekly';
+    final weekCount = weeklyCount ?? 0;
+    final weekComplete = isWeekly && weekCount >= habit.targetCount;
+
+    // Subtitle text
+    String subtitleText = habit.category;
+    if (isWeekly && habit.targetCount > 1) {
+      subtitleText = '${habit.category} • $weekCount/${habit.targetCount} days this week';
+    }
+
+    // Border color: week-complete overrides normal done state for weekly habits
+    final borderColor = weekComplete
+        ? Colors.green
+        : isDone
+            ? color
+            : missedYesterday
+                ? Colors.orange
+                : Colors.transparent;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -229,10 +303,7 @@ class _HabitTile extends StatelessWidget {
             ? color.withValues(alpha: 0.08)
             : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDone ? color : Colors.transparent,
-          width: 1.5,
-        ),
+        border: Border.all(color: borderColor, width: 1.5),
       ),
       child: ListTile(
         contentPadding:
@@ -241,17 +312,41 @@ class _HabitTile extends StatelessWidget {
           backgroundColor: color.withValues(alpha: 0.15),
           child: Icon(Icons.star, color: color, size: 20),
         ),
-        title: Text(
-          habit.title,
-          style: AppTextStyles.titleLarge.copyWith(
-            decoration: isDone ? TextDecoration.lineThrough : null,
-            color: isDone ? AppColors.textLight : AppColors.textDark,
-          ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                habit.title,
+                style: AppTextStyles.titleLarge.copyWith(
+                  decoration: isDone ? TextDecoration.lineThrough : null,
+                  color: isDone ? AppColors.textLight : AppColors.textDark,
+                ),
+              ),
+            ),
+            if (weekComplete)
+              Container(
+                margin: const EdgeInsets.only(left: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text('Week done',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold)),
+              ),
+            if (!isDone && missedYesterday && !isWeekly)
+              const Padding(
+                padding: EdgeInsets.only(left: 6),
+                child: Icon(Icons.warning_amber_rounded,
+                    color: Colors.orange, size: 16),
+              ),
+          ],
         ),
-        subtitle: Text(
-          habit.category,
-          style: AppTextStyles.caption,
-        ),
+        subtitle: Text(subtitleText, style: AppTextStyles.caption),
         trailing: GestureDetector(
           onTap: onToggle,
           child: AnimatedContainer(
