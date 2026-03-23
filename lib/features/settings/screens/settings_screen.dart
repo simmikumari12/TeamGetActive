@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/prefs_service.dart';
+import '../../../core/services/theme_notifier.dart';
 
 /// Settings screen — theme, profile, buddy personality, notifications.
 class SettingsScreen extends StatefulWidget {
@@ -57,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _setTheme(ThemePreference pref) async {
-    await PrefsService.instance.setThemeMode(pref);
+    await context.read<ThemeNotifier>().setMode(pref);
     setState(() => _theme = pref);
   }
 
