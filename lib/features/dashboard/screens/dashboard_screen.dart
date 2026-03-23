@@ -239,18 +239,64 @@ class _HabitList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pending =
+        habits.where((h) => !completedIds.contains(h.id)).toList();
+    final done = habits.where((h) => completedIds.contains(h.id)).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ── Pending ──────────────────────────────────────────
         Text('Today\'s Habits', style: AppTextStyles.headlineMedium),
         const SizedBox(height: 12),
-        ...habits.map((h) => _HabitTile(
-              habit: h,
-              isDone: completedIds.contains(h.id),
-              missedYesterday: missedYesterday.contains(h.id),
-              weeklyCount: weeklyProgress[h.id],
-              onToggle: () => onToggle(h),
-            )),
+        if (pending.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Text('All done for today! 🎉',
+                  style: AppTextStyles.bodyLarge
+                      .copyWith(color: AppColors.textLight)),
+            ),
+          )
+        else
+          ...pending.map((h) => _HabitTile(
+                habit: h,
+                isDone: false,
+                missedYesterday: missedYesterday.contains(h.id),
+                weeklyCount: weeklyProgress[h.id],
+                onToggle: () => onToggle(h),
+              )),
+
+        // ── Completed ─────────────────────────────────────────
+        if (done.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text('Completed', style: AppTextStyles.headlineMedium),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text('${done.length}',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...done.map((h) => _HabitTile(
+                habit: h,
+                isDone: true,
+                weeklyCount: weeklyProgress[h.id],
+                onToggle: () => onToggle(h),
+              )),
+        ],
       ],
     );
   }
