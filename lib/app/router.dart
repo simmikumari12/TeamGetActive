@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../data/models/habit.dart';
 import '../features/splash/screens/splash_screen.dart';
 import '../features/onboarding/screens/onboarding_screen.dart';
 import '../features/dashboard/screens/main_screen.dart';
+import '../features/habits/screens/habits_screen.dart';
 import '../features/habits/screens/add_habit_screen.dart';
+import '../features/habits/screens/add_edit_habit_screen.dart';
 import '../features/progress/screens/progress_screen.dart';
 import '../features/insights/screens/insights_screen.dart';
 import '../features/rewards/screens/rewards_screen.dart';
@@ -27,13 +30,16 @@ class AppRouter {
     splash: (_) => const SplashScreen(),
     onboarding: (_) => const OnboardingScreen(),
     dashboard: (_) => const MainScreen(),
-    habits: (_) => const _PlaceholderScreen(title: 'My Habits'),
+    habits: (_) => const HabitsScreen(),
     addHabit: (_) => const AddHabitScreen(),
-    editHabit: (_) => const _PlaceholderScreen(title: 'Edit Habit'),
+    editHabit: (ctx) {
+      final habit = ModalRoute.of(ctx)?.settings.arguments as Habit?;
+      return AddEditHabitScreen(habit: habit);
+    },
     progress: (_) => const ProgressScreen(),
-    insights: (_) => const InsightsScreen(), // ← FIXED
-    rewards: (_) => const RewardsScreen(), // ← FIXED
-    settings: (_) => const SettingsScreen(), // ← FIXED
+    insights: (_) => const InsightsScreen(),
+    rewards: (_) => const RewardsScreen(),
+    settings: (_) => const SettingsScreen(),
   };
 
   static Future<T?> pushNamed<T>(
@@ -51,33 +57,4 @@ class AppRouter {
     route,
     arguments: arguments,
   );
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.construction_rounded,
-              size: 48,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '$title — coming soon',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
