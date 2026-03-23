@@ -76,6 +76,14 @@ class PrefsService {
     await _p.setString(AppConstants.keyLastBuddyDate, today);
   }
 
+  // --- Claude API key ---
+
+  String get claudeApiKey =>
+      _p.getString(AppConstants.keyClaudeApiKey) ?? '';
+
+  Future<void> setClaudeApiKey(String key) =>
+      _p.setString(AppConstants.keyClaudeApiKey, key.trim());
+
   /// Returns true if the cached buddy messages were generated today.
   bool get isBuddyMessageFresh {
     final cached = lastBuddyDate;

@@ -24,6 +24,9 @@ dependencies:
   # Date formatting
   intl: ^0.20.0
 
+  # HTTP client — used for Claude API fallback in BuddyService
+  http: ^1.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

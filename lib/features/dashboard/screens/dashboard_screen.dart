@@ -619,6 +619,22 @@ class _BuddyCard extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/buddy-chat'),
+              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16),
+              label: const Text('Chat with Buddy'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primaryPurple,
+                textStyle: AppTextStyles.labelLarge,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              ),
+            ),
+          ),
         ],
       ),
     );
