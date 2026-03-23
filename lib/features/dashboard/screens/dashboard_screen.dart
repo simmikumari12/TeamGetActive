@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/badge_service.dart';
 import '../../../core/services/prefs_service.dart';
 import '../../../data/models/habit.dart';
 import '../../../data/models/habit_log.dart';
@@ -56,6 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           pointsEarned: points,
         ),
       );
+      await BadgeService.instance.checkAll();
       setState(() => _completedToday.add(id));
     }
   }
