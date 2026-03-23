@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-/// Central color palette for Habit Mastery League.
+/// Central color palette for Get Active.
+/// Primary brand: #0033A0 (royal blue) on white.
 /// All colors are defined here — never hardcode hex values elsewhere.
 class AppColors {
   AppColors._();
 
-  // --- Primary brand ---
-  static const Color primaryPurple = Color(0xFF6C3DE8);
-  static const Color primaryPurpleLight = Color(0xFF9B6EFF);
-  static const Color primaryPurpleDark = Color(0xFF4A1FC8);
+  // --- Primary brand (#0033A0 royal blue) ---
+  static const Color primaryPurple = Color(0xFF0033A0);
+  static const Color primaryPurpleLight = Color(0xFF3366CC);
+  static const Color primaryPurpleDark = Color(0xFF001F7A);
 
   // --- Accent / gamification ---
   static const Color accentGold = Color(0xFFFFB800);
@@ -24,22 +25,22 @@ class AppColors {
   static const Color badgeSilver = Color(0xFFC0C0C0);
   static const Color badgeBronze = Color(0xFFCD7F32);
 
-  // --- Light theme surfaces ---
-  static const Color lightBackground = Color(0xFFF8F6FF);
+  // --- Light theme surfaces (white base) ---
+  static const Color lightBackground = Color(0xFFFFFFFF);
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightCard = Color(0xFFF0EBFF);
-  static const Color lightDivider = Color(0xFFE0D8F8);
+  static const Color lightCard = Color(0xFFF0F5FF);
+  static const Color lightDivider = Color(0xFFCCDAF5);
 
   // --- Dark theme surfaces ---
-  static const Color darkBackground = Color(0xFF0F0A1E);
-  static const Color darkSurface = Color(0xFF1A1030);
-  static const Color darkCard = Color(0xFF231845);
-  static const Color darkDivider = Color(0xFF352860);
+  static const Color darkBackground = Color(0xFF0A0F1E);
+  static const Color darkSurface = Color(0xFF101828);
+  static const Color darkCard = Color(0xFF162040);
+  static const Color darkDivider = Color(0xFF1E3060);
 
   // --- Text ---
-  static const Color textDark = Color(0xFF1A1030);
-  static const Color textMedium = Color(0xFF5A4E7C);
-  static const Color textLight = Color(0xFF9B8EC4);
+  static const Color textDark = Color(0xFF001A40);
+  static const Color textMedium = Color(0xFF33468A);
+  static const Color textLight = Color(0xFF6677BB);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
   // --- Difficulty level indicators ---
@@ -49,9 +50,9 @@ class AppColors {
 
   /// Color options for habit category tags (indexed by Habit.colorIndex).
   static const List<Color> categoryColors = [
-    Color(0xFF6C3DE8), // purple (default)
+    Color(0xFF0033A0), // brand blue (default)
     Color(0xFF2ECC71), // health green
-    Color(0xFF3498DB), // blue
+    Color(0xFF3498DB), // sky blue
     Color(0xFFFF6B35), // orange
     Color(0xFFE74C3C), // red
     Color(0xFF9B59B6), // violet

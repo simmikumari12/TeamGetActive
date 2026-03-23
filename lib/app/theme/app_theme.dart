@@ -32,6 +32,7 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: AppTextStyles.headlineLarge,
+        surfaceTintColor: Colors.transparent,
       ),
       cardTheme: const CardThemeData(
         color: AppColors.lightCard,
