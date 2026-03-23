@@ -19,6 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String _userName;
   late String _personality;
   late bool _notifications;
+  late String _claudeApiKey;
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _userName = PrefsService.instance.userName;
     _personality = PrefsService.instance.buddyPersonality;
     _notifications = PrefsService.instance.notificationsEnabled;
+    _claudeApiKey = PrefsService.instance.claudeApiKey;
   }
 
   Future<void> _editName() async {
@@ -66,6 +68,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _setPersonality(String p) async {
     await PrefsService.instance.setBuddyPersonality(p);
     setState(() => _personality = p);
+  }
+
+  Future<void> _editApiKey() async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _ApiKeyScreen(current: _claudeApiKey),
+      ),
+    );
+    if (result == null) return;
+    await PrefsService.instance.setClaudeApiKey(result);
+    setState(() => _claudeApiKey = result);
   }
 
   Future<void> _setNotifications(bool val) async {
@@ -128,6 +142,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             activeThumbColor: AppColors.primaryPurple,
           ),
           const Divider(height: 1),
+          _SectionLabel('AI Integration'),
+          ListTile(
+            leading: const Icon(Icons.vpn_key_outlined),
+            title: const Text('OpenAI API Key'),
+            subtitle: Text(
+              _claudeApiKey.isEmpty
+                  ? 'Not set — buddy uses rule-based mode'
+                  : 'Set — AI-powered mode active',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: _claudeApiKey.isEmpty
+                    ? AppColors.textLight
+                    : Colors.green,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: _editApiKey,
+          ),
+          const Divider(height: 1),
           _SectionLabel('About'),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
@@ -175,6 +207,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
       default:
         return Icons.person_rounded;
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dedicated screen for API key entry — avoids RadioGroup overlay conflict
+// ---------------------------------------------------------------------------
+
+class _ApiKeyScreen extends StatefulWidget {
+  final String current;
+  const _ApiKeyScreen({required this.current});
+
+  @override
+  State<_ApiKeyScreen> createState() => _ApiKeyScreenState();
+}
+
+class _ApiKeyScreenState extends State<_ApiKeyScreen> {
+  late final TextEditingController _ctrl;
+  bool _obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController(text: widget.current);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('OpenAI API Key')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter your OpenAI API key to enable AI-powered responses in the Buddy chat. '
+              'Your key is stored on-device only and never committed to code.',
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _ctrl,
+              obscureText: _obscure,
+              decoration: InputDecoration(
+                hintText: 'sk-proj-...',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(_obscure
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined),
+                  onPressed: () => setState(() => _obscure = !_obscure),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                if (widget.current.isNotEmpty)
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, ''),
+                    child: const Text('Remove key',
+                        style: TextStyle(color: Colors.red)),
+                  ),
+                const Spacer(),
+                FilledButton(
+                  onPressed: () =>
+                      Navigator.pop(context, _ctrl.text.trim()),
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

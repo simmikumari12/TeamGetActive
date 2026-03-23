@@ -9,6 +9,7 @@ import '../features/habits/screens/add_edit_habit_screen.dart';
 import '../features/progress/screens/progress_screen.dart';
 import '../features/insights/screens/insights_screen.dart';
 import '../features/rewards/screens/rewards_screen.dart';
+import '../features/buddy/screens/buddy_chat_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 
 /// Central route registry for Habit Mastery League.
@@ -25,6 +26,7 @@ class AppRouter {
   static const String insights = '/insights';
   static const String rewards = '/rewards';
   static const String settings = '/settings';
+  static const String buddyChat = '/buddy-chat';
 
   static Map<String, WidgetBuilder> get routes => {
     splash: (_) => const SplashScreen(),
@@ -40,6 +42,7 @@ class AppRouter {
     insights: (_) => const InsightsScreen(),
     rewards: (_) => const RewardsScreen(),
     settings: (_) => const SettingsScreen(),
+    buddyChat: (_) => const BuddyChatScreen(),
   };
 
   static Future<T?> pushNamed<T>(

@@ -17,6 +17,7 @@ class AppConstants {
   static const String keyLastBuddyMessage = 'last_buddy_message';
   static const String keyLastBuddyDate = 'last_buddy_date';
   static const String keyLastMicroGoal = 'last_micro_goal';
+  static const String keyClaudeApiKey = 'claude_api_key';
 
   // --- Gamification rules ---
   static const int basePointsPerCompletion = 10;
