@@ -57,7 +57,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await PrefsService.instance.setUserName(result);
       setState(() => _userName = result);
     }
-    ctrl.dispose();
   }
 
   Future<void> _setTheme(ThemePreference pref) async {
